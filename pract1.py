@@ -4,7 +4,7 @@ class HashTable:
         self.table = [None] * size
 
     def _hash(self, key):
-        return hash(key) % self.size
+        return key % self.size
 
     # Separate Chaining
     def insert_sc(self, key):
