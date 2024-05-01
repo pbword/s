@@ -1,69 +1,81 @@
-#include<iostream>
-#include<stack>
+#include <iostream>
+#include <stack>
 using namespace std;
-
-char exprsn[] = {'+', '-', '-', 'a', '*', 'b', 'c', '/', 'd', 'e', 'f'};
-
-class Node {
-public:
+// Node structure for the expression tree
+struct Node {
+    char data;
     Node* left;
     Node* right;
-    char data;
+    Node(char val) {
+        data = val;
+        left = nullptr;
+        right = nullptr;
+    }
 };
-
-stack<Node*> stk;
-
-void createExpressionTree() {
-    Node* ptr1;
-    Node* ptr2;
-    for (int i = 10; i > -1; i--) {
-        Node* nn = new Node;
-        nn->left = NULL;
-        nn->right = NULL;
-        if (exprsn[i] != '*' && exprsn[i] != '+' && exprsn[i] != '-' && exprsn[i] != '/') {
-            nn->data = exprsn[i];
-            stk.push(nn);
+// Function to check if a character is an operand
+bool isOperand(char c) {
+    return isalpha(c);
+}
+// Function to construct an expression tree from prefix expression
+Node* constructExpressionTree(string prefixExpression) {
+    stack<Node*> st;
+    for (int i = prefixExpression.size() - 1; i >= 0; i--) {
+        char c = prefixExpression[i];
+        if (isOperand(c)) {
+            st.push(new Node(c));
+        } else {
+            Node* newNode = new Node(c);
+            newNode->left = st.top();
+            st.pop();
+            newNode->right = st.top();
+            st.pop();
+            st.push(newNode);
         }
-        else {
-            ptr1 = stk.top();
-            stk.pop();
-            ptr2 = stk.top();
-            stk.pop();
-            nn->data = exprsn[i];
-            nn->left = ptr1;
-            nn->right = ptr2;
-            stk.push(nn);
+    }
+    return st.top();
+}
+// Function to perform postorder traversal of the expression tree (non-recursive)
+void postorderTraversal(Node* root) {
+    if (root == nullptr) return;
+    stack<Node*> st;
+    Node* prev = nullptr;
+    st.push(root);
+    while (!st.empty()) {
+        Node* curr = st.top();
+        if (!prev || prev->left == curr || prev->right == curr) {
+            if (curr->left) {
+                st.push(curr->left);
+            } else if (curr->right) {
+                st.push(curr->right);
+            }
+        } else if (curr->left == prev) {
+            if (curr->right) {
+                st.push(curr->right);
+            }
+        } else {
+            cout << curr->data << " ";
+            st.pop();
         }
+        prev = curr;
     }
 }
-
-void postOrderTraversal(Node* root) {
-    stack<Node*> s1;
-    stack<char> s2;
-    s1.push(root);
-    while (!s1.empty()) {
-        Node* current = s1.top();
-        s1.pop();
-        s2.push(current->data);
-        if (current->left) {
-            s1.push(current->left);
-        }
-        if (current->right) {
-            s1.push(current->right);
-        }
-    }
-    while (!s2.empty()) {
-        cout << s2.top() << " ";
-        s2.pop();
-    }
+// Function to delete the entire expression tree
+void deleteTree(Node* root) {
+    if (root == nullptr) return;
+    deleteTree(root->left);
+    deleteTree(root->right);
+    delete root;
 }
-
 int main() {
-    createExpressionTree();
-    cout << "Expression tree is created !!";
-    cout << "\nPost Order Traversal is : [";
-    Node* root = stk.top();
-    postOrderTraversal(root);
-    cout << "]";
+    string prefixExpression;
+    cout << "Enter the prefix expression: ";
+    cin >> prefixExpression;
+    Node* root = constructExpressionTree(prefixExpression);
+    cout << "Postorder Traversal: ";
+    postorderTraversal(root);
+    cout << endl;
+    // Delete the entire tree to free up memory
+    deleteTree(root);
     return 0;
 }
+
