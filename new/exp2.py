@@ -1,7 +1,9 @@
 class Node:
-    def __init__(self, key, value):
+    def __init__(self, key, value, next=None):
         self.key = key
         self.value = value
+        self.next = next  # Add this line
+
 
 class HashTable:
     def __init__(self, size):
@@ -21,9 +23,10 @@ class HashTable:
             if node.key == key:
                 node.value = value
                 return
-            prev = node
+            if node.next is None:  # Check if the next node exists
+                node.next = Node(key, value)  # If not, create a new node
+                return
             node = node.next
-        prev.next = Node(key, value)
 
     def insert_with_replacement(self, key, value):
         index = self._hash(key)
